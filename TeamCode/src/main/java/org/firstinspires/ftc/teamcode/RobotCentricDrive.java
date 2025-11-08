@@ -93,15 +93,6 @@ public class RobotCentricDrive extends LinearOpMode {
             
             // ================== MECHANISM CONTROLS ==================
             
-            // Arm control (DPad) - High speed motor needs power limiting
-            if (gamepad1.dpad_up) {
-                robot.setArmPower(0.4);    // Limited power for 6000+ RPM motor
-            } else if (gamepad1.dpad_down) {
-                robot.setArmPower(-0.4);   // Limited power for 6000+ RPM motor
-            } else {
-                robot.setArmPower(0);
-            }
-            
             // Intake control - High speed motor
             if (gamepad1.y) {
                 robot.setIntakePower(0.8);    // Moderate power for 6000+ RPM motor
@@ -109,18 +100,6 @@ public class RobotCentricDrive extends LinearOpMode {
                 robot.setIntakePower(-0.8);   // Moderate power for 6000+ RPM motor
             } else {
                 robot.setIntakePower(0);
-            }
-            
-            // Lift control (triggers) - High speed motor
-            double liftPower = gamepad1.right_trigger - gamepad1.left_trigger;
-            robot.setLiftPower(liftPower * 0.6);  // Limited power for 6000+ RPM motor
-            
-            // Claw and wrist controls
-            if (gamepad1.a) {
-                robot.setClawPosition(robot.clawServo.getPosition() > 0.5 ? 0.0 : 1.0);
-            }
-            if (gamepad1.b) {
-                robot.setWristPosition(robot.wristServo.getPosition() > 0.5 ? 0.0 : 1.0);
             }
             
             // ================== TELEMETRY ==================
@@ -134,9 +113,7 @@ public class RobotCentricDrive extends LinearOpMode {
             telemetry.addData("Input", "D:%.2f S:%.2f T:%.2f", drive, strafe, twist);
             telemetry.addData("Motors", "LF:%.2f RF:%.2f LB:%.2f RB:%.2f", 
                             leftFrontPower, rightFrontPower, leftBackPower, rightBackPower);
-            telemetry.addData("Mechanisms", "Arm:%.2f Lift:%.2f Intake:%.2f",
-                            robot.armMotor.getPower(),
-                            robot.liftMotor.getPower(), 
+            telemetry.addData("Mechanisms", "Intake:%.2f",
                             robot.intakeMotor.getPower());
             
             telemetry.update();

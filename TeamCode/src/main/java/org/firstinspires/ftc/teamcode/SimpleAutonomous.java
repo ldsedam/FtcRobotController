@@ -19,8 +19,6 @@ public class SimpleAutonomous extends LinearOpMode {
     
     // Motor speeds for autonomous
     private static final double DRIVE_SPEED = 0.8;      // 312 RPM precision motors
-    private static final double ARM_SPEED = 0.3;        // 6000+ RPM high speed motor (limited)
-    private static final double LIFT_SPEED = 0.4;       // 6000+ RPM high speed motor (limited)
     
     @Override
     public void runOpMode() {
@@ -39,17 +37,12 @@ public class SimpleAutonomous extends LinearOpMode {
 
         // Step through each leg of the path, ensuring that the Auto mode has not been stopped
         
-        // Step 1: Initialize robot position
-        robot.setClawPosition(0.0);  // Open claw
-        robot.setWristPosition(0.5); // Center wrist
-        sleep(500);
+        // Step 1: Initialize robot position (Servos Removed)
+        // robot.setClawPosition(0.0);  // Open claw
+        // robot.setWristPosition(0.5); // Center wrist
+        // sleep(500);
         
-        // Step 2: Lift arm to safe position using high speed motor (limited power)
-        telemetry.addData("Path", "Step 2: Raising arm");
-        telemetry.update();
-        robot.setArmPower(ARM_SPEED);
-        sleep(1000);  // Run for 1 second
-        robot.setArmPower(0);
+        // Step 2: Lift arm (Removed)
         
         // Step 3: Drive forward using precision 312 RPM motors
         telemetry.addData("Path", "Step 3: Driving forward");
@@ -72,27 +65,16 @@ public class SimpleAutonomous extends LinearOpMode {
         sleep(1500);  // Drive for 1.5 seconds
         robot.setTankDrive(0, 0);
         
-        // Step 6: Lower arm and activate intake (high speed motors with limited power)
-        telemetry.addData("Path", "Step 6: Lowering arm and intake");
+        // Step 6: Activate intake
+        telemetry.addData("Path", "Step 6: Intake");
         telemetry.update();
-        robot.setArmPower(-ARM_SPEED);
         robot.setIntakePower(0.6);  // Limited power for high speed motor
         sleep(1500);
-        robot.setArmPower(0);
         robot.setIntakePower(0);
         
-        // Step 7: Close claw to grab object
-        telemetry.addData("Path", "Step 7: Closing claw");
-        telemetry.update();
-        robot.setClawPosition(1.0);  // Close claw
-        sleep(500);
+        // Step 7: Grab object (Removed)
         
-        // Step 8: Raise lift using high speed motor (limited power)
-        telemetry.addData("Path", "Step 8: Raising lift");
-        telemetry.update();
-        robot.setLiftPower(LIFT_SPEED);
-        sleep(2000);
-        robot.setLiftPower(0);
+        // Step 8: Lift (Removed)
         
         // Step 9: Drive backward to starting position
         telemetry.addData("Path", "Step 9: Returning to start");

@@ -21,7 +21,7 @@ public class MotorTest extends LinearOpMode {
     private static final double HIGH_SPEED_TEST = 0.3;      // Test power for 6000+ RPM mechanism motors
     
     // Test state
-    private int testMode = 0;  // 0=stopped, 1=drive, 2=arm, 3=intake, 4=lift, 5=servos
+    private int testMode = 0;  // 0=stopped, 1=drive, 2=intake
     private boolean lastTestButton = false;
 
     @Override
@@ -48,7 +48,7 @@ public class MotorTest extends LinearOpMode {
             
             boolean currentTestButton = gamepad1.a;
             if (currentTestButton && !lastTestButton) {
-                testMode = (testMode + 1) % 6;  // Cycle through 0-5
+                testMode = (testMode + 1) % 3;  // Cycle through 0-2
             }
             lastTestButton = currentTestButton;
             
@@ -61,9 +61,7 @@ public class MotorTest extends LinearOpMode {
             
             // Stop all motors first
             robot.setDrivePower(0, 0, 0, 0);
-            robot.setArmPower(0);
             robot.setIntakePower(0);
-            robot.setLiftPower(0);
             
             String currentTest = "STOPPED";
             String instructions = "Press A for next test, B to stop";
@@ -80,29 +78,10 @@ public class MotorTest extends LinearOpMode {
                     robot.setTankDrive(PRECISION_DRIVE_TEST, PRECISION_DRIVE_TEST);
                     break;
                     
-                case 2: // Test arm motor (6000+ RPM)
-                    currentTest = "ARM MOTOR (6000+ RPM - Limited Power)";
-                    instructions = "Arm should move up slowly with limited power";
-                    robot.setArmPower(HIGH_SPEED_TEST);
-                    break;
-                    
-                case 3: // Test intake motor (6000+ RPM)
+                case 2: // Test intake motor (6000+ RPM)
                     currentTest = "INTAKE MOTOR (6000+ RPM - Limited Power)";
                     instructions = "Intake should spin forward with limited power";
                     robot.setIntakePower(HIGH_SPEED_TEST);
-                    break;
-                    
-                case 4: // Test lift motor (6000+ RPM)
-                    currentTest = "LIFT MOTOR (6000+ RPM - Limited Power)";
-                    instructions = "Lift should move up slowly with limited power";
-                    robot.setLiftPower(HIGH_SPEED_TEST);
-                    break;
-                    
-                case 5: // Test servos
-                    currentTest = "SERVO TEST";
-                    instructions = "Servos should move to center position";
-                    robot.setClawPosition(0.5);
-                    robot.setWristPosition(0.5);
                     break;
             }
             
@@ -116,22 +95,10 @@ public class MotorTest extends LinearOpMode {
             } else if (gamepad1.dpad_left) {
                 robot.setTankDrive(-PRECISION_DRIVE_TEST, PRECISION_DRIVE_TEST);  // Turn left
             } else if (gamepad1.dpad_right) {
-                robot.setTankDrive(PRECISION_DRIVE_TEST, -PRECISION_DRIVE_TEST);  // Turn right
+                robot.setTankDrive(PRECISION_DRIVE_TEST, PRECISION_DRIVE_TEST);  // Turn right
             }
             
             // Manual mechanism controls (6000+ RPM motors with limited power)
-            if (gamepad1.left_bumper) {
-                robot.setArmPower(HIGH_SPEED_TEST);     // Arm up
-            } else if (gamepad1.left_trigger > 0.1) {
-                robot.setArmPower(-HIGH_SPEED_TEST);    // Arm down
-            }
-            
-            if (gamepad1.right_bumper) {
-                robot.setLiftPower(HIGH_SPEED_TEST);    // Lift up
-            } else if (gamepad1.right_trigger > 0.1) {
-                robot.setLiftPower(-HIGH_SPEED_TEST);   // Lift down
-            }
-            
             if (gamepad1.y) {
                 robot.setIntakePower(HIGH_SPEED_TEST);  // Intake forward
             } else if (gamepad1.x) {
@@ -151,18 +118,11 @@ public class MotorTest extends LinearOpMode {
                             robot.leftBackDrive.getPower(),
                             robot.rightBackDrive.getPower());
             
-            telemetry.addData("Mechanism Motors (6000+ RPM)", "Arm:%.2f Intake:%.2f Lift:%.2f",
-                            robot.armMotor.getPower(),
-                            robot.intakeMotor.getPower(),
-                            robot.liftMotor.getPower());
-            
-            telemetry.addData("Servos", "Claw:%.2f Wrist:%.2f", 
-                            robot.clawServo.getPosition(),
-                            robot.wristServo.getPosition());
+            telemetry.addData("Mechanism Motors (6000+ RPM)", "Intake:%.2f",
+                            robot.intakeMotor.getPower());
             
             telemetry.addLine();
-            telemetry.addData("Manual Controls", "DPad=Drive, Bumpers/Triggers=Mechanisms");
-            telemetry.addData("Manual Controls", "Y/X=Intake, LB/LT=Arm, RB/RT=Lift");
+            telemetry.addData("Manual Controls", "DPad=Drive, Y/X=Intake");
             
             // Show encoder values for precision drive motors
             int[] encoders = robot.getDriveEncoders();

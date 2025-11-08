@@ -12,8 +12,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
  * Optimized for 312 RPM drive motors with excellent control
  * Features field-relative driving option
  */
-@TeleOp(name="Advanced Mecanum Drive", group="Linear Opmode")
-public class AdvancedMecanumDrive extends LinearOpMode {
+@TeleOp(name="TestFunctionTeleop", group="Linear Opmode")
+public class TestFunctionTeleop extends LinearOpMode {
 
     // Declare OpMode members
     private final RobotHardware robot = new RobotHardware();
@@ -166,8 +166,14 @@ public class AdvancedMecanumDrive extends LinearOpMode {
 
             // ================== MECHANISM CONTROLS ==================
 
-            // Intake control - High speed motor
-            if (gamepad1.y) {
+            if (gamepad1.a) {
+                if (robot.HoodServo != null) {
+                    robot.HoodServo.setPosition(0.0);
+                }
+            } else if (gamepad1.y) {
+                if (robot.HoodServo != null) {
+                    robot.HoodServo.setPosition(0.65);
+                }
                 robot.setIntakePower(0.8);    // Moderate power for 6000+ RPM motor
             } else if (gamepad1.x) {
                 robot.setIntakePower(-0.8);   // Moderate power for 6000+ RPM motor

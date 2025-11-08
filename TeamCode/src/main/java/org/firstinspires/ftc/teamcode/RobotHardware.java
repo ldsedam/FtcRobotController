@@ -5,6 +5,7 @@ import com.qualcomm.robotcore.hardware.HardwareMap;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.IMU;
 import com.qualcomm.hardware.rev.RevHubOrientationOnRobot;
+import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 
 /**
  * Hardware configuration for robot with goBILDA 5203 series motors
@@ -21,18 +22,14 @@ public class RobotHardware {
     public DcMotor rightBackDrive   = null;
     
     // High speed motors (6000+ RPM goBILDA motors)
-    public DcMotor armMotor         = null;
     public DcMotor intakeMotor      = null;
-    public DcMotor liftMotor        = null;
     
     // PID controlled motors
     public DcMotor launcherMotor    = null;  // 5203 series 6000rpm for launcher (4500 RPM target)
-    public DcMotor pickupMotor      = null;  // 5203 series 6000rpm for pickup (100 RPM target)
     public DcMotor kickerMotor      = null;  // 5203 series 312rpm for kicker tasks (150 RPM target)
     
     // Servos
-    public Servo clawServo          = null;
-    public Servo wristServo         = null;
+    public Servo HoodServo          = null;
     
     // IMU for field-centric drive (optional)
     public IMU imu                  = null;
@@ -50,28 +47,28 @@ public class RobotHardware {
         hwMap = ahwMap;
         
         // Define and Initialize Motors (note: need to use the names in your robot configuration)
-        leftFrontDrive  = hwMap.get(DcMotor.class, "left_front_drive");
-        rightFrontDrive = hwMap.get(DcMotor.class, "right_front_drive");
-        leftBackDrive   = hwMap.get(DcMotor.class, "left_back_drive");
-        rightBackDrive  = hwMap.get(DcMotor.class, "right_back_drive");
+        leftFrontDrive  = hwMap.get(DcMotor.class, "FrontLeftDrive");
+        rightFrontDrive = hwMap.get(DcMotor.class, "FrontRightDrive");
+        leftBackDrive   = hwMap.get(DcMotor.class, "BackLeftDrive");
+        rightBackDrive  = hwMap.get(DcMotor.class, "BackRightDrive");
         
         // High speed motors for mechanisms
-        armMotor       = hwMap.get(DcMotor.class, "arm_motor");
-        intakeMotor    = hwMap.get(DcMotor.class, "intake_motor");
-        liftMotor      = hwMap.get(DcMotor.class, "lift_motor");
+        intakeMotor    = hwMap.get(DcMotor.class, "IntakeMotor");
         
         // PID controlled motors
-        launcherMotor  = hwMap.get(DcMotor.class, "launcher_motor");   // 5203 series 6000rpm
-        pickupMotor    = hwMap.get(DcMotor.class, "pickup_motor");     // 5203 series 6000rpm
-        kickerMotor    = hwMap.get(DcMotor.class, "kicker_motor");     // 5203 series 312rpm
+        launcherMotor  = hwMap.get(DcMotor.class, "LauncherMotor");   // 5203 series 6000rpm
+        kickerMotor    = hwMap.get(DcMotor.class, "KickerMotor");     // 5203 series 312rpm
         
         // Initialize servos
-        clawServo      = hwMap.get(Servo.class, "claw_servo");
-        wristServo     = hwMap.get(Servo.class, "wrist_servo");
+        try {
+            HoodServo      = hwMap.get(Servo.class, "HoodServo");
+        } catch (Exception e) {
+            HoodServo = null;
+        }
         
         // Initialize IMU (optional - for field-centric drive)
         try {
-            imu = hwMap.get(IMU.class, "imu");
+            imu = hwMap.get(IMU.class, "IMU");
             
             // Initialize IMU with hub orientation
             // Adjust these values based on how your Control Hub is mounted:
@@ -96,15 +93,11 @@ public class RobotHardware {
         rightBackDrive.setDirection(DcMotor.Direction.FORWARD);
         
         // High speed motors - may need direction adjustment based on mounting
-        armMotor.setDirection(DcMotor.Direction.FORWARD);
-        intakeMotor.setDirection(DcMotor.Direction.FORWARD);
-        liftMotor.setDirection(DcMotor.Direction.FORWARD);
+        intakeMotor.setDirection(DcMotor.Direction.REVERSE);
         
         // Set all motors to zero power
         setDrivePower(0, 0, 0, 0);
-        armMotor.setPower(0);
         intakeMotor.setPower(0);
-        liftMotor.setPower(0);
         
         // Set motor run modes
         // Precision drive motors (312 RPM) - excellent for controlled driving
@@ -114,26 +107,16 @@ public class RobotHardware {
         rightBackDrive.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         
         // High speed motors - good for fast mechanisms
-        armMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         intakeMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
-        liftMotor.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
         
         // PID motors setup - all need encoders for RPM control
         launcherMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         launcherMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         launcherMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
         
-        pickupMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
-        pickupMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
-        pickupMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        
         kickerMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
         kickerMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
         kickerMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-        
-        // Set servo positions to safe starting positions
-        clawServo.setPosition(0.5);  // Mid position
-        wristServo.setPosition(0.5); // Mid position
     }
     
     /**
@@ -179,45 +162,13 @@ public class RobotHardware {
     }
     
     /**
-     * Control arm with high speed motor (6000+ RPM)
-     * @param power Arm power (-1.0 to 1.0)
-     */
-    public void setArmPower(double power) {
-        armMotor.setPower(power);
-    }
-    
-    /**
      * Control intake with high speed motor
      * @param power Intake power (-1.0 to 1.0)
      */
     public void setIntakePower(double power) {
         intakeMotor.setPower(power);
     }
-    
-    /**
-     * Control lift with high speed motor  
-     * @param power Lift power (-1.0 to 1.0)
-     */
-    public void setLiftPower(double power) {
-        liftMotor.setPower(power);
-    }
-    
-    /**
-     * Set claw servo position
-     * @param position Servo position (0.0 to 1.0)
-     */
-    public void setClawPosition(double position) {
-        clawServo.setPosition(position);
-    }
-    
-    /**
-     * Set wrist servo position
-     * @param position Servo position (0.0 to 1.0)
-     */
-    public void setWristPosition(double position) {
-        wristServo.setPosition(position);
-    }
-    
+
     /**
      * Get drive motor encoder positions (useful for autonomous)
      */
@@ -266,7 +217,7 @@ public class RobotHardware {
      */
     public double getHeadingDegrees() {
         if (imu != null) {
-            return imu.getRobotYawAngle(org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.DEGREES);
+            return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.DEGREES);
         }
         return 0.0;
     }
@@ -276,7 +227,7 @@ public class RobotHardware {
      */
     public double getHeadingRadians() {
         if (imu != null) {
-            return imu.getRobotYawAngle(org.firstinspires.ftc.robotcore.external.navigation.AngleUnit.RADIANS);
+            return imu.getRobotYawPitchRollAngles().getYaw(AngleUnit.RADIANS);
         }
         return 0.0;
     }
