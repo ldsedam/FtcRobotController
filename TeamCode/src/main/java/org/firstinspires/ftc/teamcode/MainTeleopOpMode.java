@@ -39,9 +39,9 @@ public class MainTeleopOpMode extends LinearOpMode {
         // ===================== TARGET VELOCITIES =====================
         final double intakeTargetRPM = -250.0; // Target for 312 RPM motor
         final double kickerTargetRPM = 200.0;
-        final double closeLauncherTargetRPM = 1500.0;
-        final double midLauncherTargetRPM = 3500.0;
-        final double farLauncherTargetRPM = 4000.0;
+        final double closeLauncherTargetRPM = 2350.0;
+        final double midLauncherTargetRPM = 3000.0;
+        final double farLauncherTargetRPM = 3750.0;
 
         final double intakeVelocity = (intakeTargetRPM / 60.0) * TICKS_PER_REV_312_RPM;
         final double kickerVelocity = (kickerTargetRPM / 60.0) * TICKS_PER_REV_312_RPM;
@@ -189,7 +189,7 @@ public class MainTeleopOpMode extends LinearOpMode {
 
             // --- DRIVETRAIN CONTROL ---
             double drive = -gamepad1.left_stick_y;
-            double strafe = gamepad1.left_stick_x;
+            double strafe = -gamepad1.left_stick_x;
             double twist = gamepad1.right_stick_x;
 
             drive = cubicScale(drive);
@@ -237,7 +237,7 @@ public class MainTeleopOpMode extends LinearOpMode {
                 intakeSystemToggle = false;
                 launcherTargetVelocity = farLauncherVelocity;
                 if (HoodServo != null) {
-                    HoodServo.setPosition(0.0);
+                    HoodServo.setPosition(0.30);
                 }
                 if (launcherMotor != null) {
                     if (Math.abs(launcherMotor.getVelocity() - farLauncherVelocity) < (farLauncherVelocity * 0.10)) {
@@ -249,7 +249,7 @@ public class MainTeleopOpMode extends LinearOpMode {
                 intakeSystemToggle = false;
                 launcherTargetVelocity = midLauncherVelocity;
                 if (HoodServo != null) {
-                    HoodServo.setPosition(0.4);
+                    HoodServo.setPosition(0.45);
                 }
                 if (launcherMotor != null) {
                     if (Math.abs(launcherMotor.getVelocity() - midLauncherVelocity) < (midLauncherVelocity * 0.10)) {
@@ -261,7 +261,7 @@ public class MainTeleopOpMode extends LinearOpMode {
                 intakeSystemToggle = false;
                 launcherTargetVelocity = closeLauncherVelocity;
                 if (HoodServo != null) {
-                    HoodServo.setPosition(0.65);
+                    HoodServo.setPosition(0.9);
                 }
                 if (launcherMotor != null) {
                     if (Math.abs(launcherMotor.getVelocity() - closeLauncherVelocity) < (closeLauncherVelocity * 0.10)) {
