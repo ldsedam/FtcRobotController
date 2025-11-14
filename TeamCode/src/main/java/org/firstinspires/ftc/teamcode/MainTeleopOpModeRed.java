@@ -20,13 +20,13 @@ import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
 import java.util.List;
 
-@TeleOp(name = "Main TeleOp Mode Blue", group = "Competition")
-public class MainTeleopOpModeBlue extends LinearOpMode {
+@TeleOp(name = "Main TeleOp Mode Red", group = "Competition")
+public class MainTeleopOpModeRed extends LinearOpMode {
 
     // Ticks per revolution for different goBILDA motors
     private static final double TICKS_PER_REV_6000_RPM = 28.0;
     private static final double TICKS_PER_REV_312_RPM = 537.6;
-    private static final int TARGET_APRILTAG_ID = 20;
+    private static final int TARGET_APRILTAG_ID = 24;
 
     private enum RobotState {
         IDLE,
@@ -58,7 +58,7 @@ public class MainTeleopOpModeBlue extends LinearOpMode {
         final double kickerLaunchTargetRPM = 300.0;
         final double closeLauncherTargetRPM = 2350.0;
         final double midLauncherTargetRPM = 2800.0;
-        final double farLauncherTargetRPM = 3350.0;
+        final double farLauncherTargetRPM = 3400.0;
 
         final double intakeVelocity = (intakeTargetRPM / 60.0) * TICKS_PER_REV_312_RPM;
         final double kickerIntakeVelocity = (kickerIntakeTargetRPM / 60.0) * TICKS_PER_REV_312_RPM;
@@ -265,10 +265,11 @@ public class MainTeleopOpModeBlue extends LinearOpMode {
                         final double AIM_TOLERANCE = 1.5; // Degrees
 
                         if (currentState == RobotState.TURNING_TO_SHOOT_FAR) {
-                            if (Math.abs(tx) > AIM_TOLERANCE) {
+                            double aimError = tx + 5.0; // Offset to aim 5 degrees to the right
+                            if (Math.abs(aimError) > AIM_TOLERANCE) {
                                 double turnKp = 0.05;
                                 double minTurnPower = 0.5;
-                                twist = (turnKp * tx) + Math.copySign(minTurnPower, tx);
+                                twist = (turnKp * aimError) + Math.copySign(minTurnPower, aimError);
                                 // Clamp twist to a reasonable range
                                 twist = Math.max(-0.8, Math.min(0.8, twist));
                             } else {
