@@ -15,8 +15,8 @@ import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.YawPitchRollAngles;
 
-@TeleOp(name = "Main TeleOp Mode", group = "Competition")
-public class MainTeleopOpMode extends LinearOpMode {
+@TeleOp(name = "Main TeleOp Mode Blue", group = "Competition")
+public class MainTeleopOpModeBlue extends LinearOpMode {
 
     // Ticks per revolution for different goBILDA motors
     private static final double TICKS_PER_REV_6000_RPM = 28.0;
@@ -270,7 +270,7 @@ public class MainTeleopOpMode extends LinearOpMode {
                 if (!lastYPress) { // If the button was just pressed
                     closeLaunchTimer.reset();
                 }
-                if (closeLaunchTimer.seconds() >= 0.5) {
+                if (closeLaunchTimer.seconds() >= 1.5) {
                     intakeTargetVelocity = intakeVelocity;
                     kickerTargetVelocity = kickerLaunchVelocity;
                 }
