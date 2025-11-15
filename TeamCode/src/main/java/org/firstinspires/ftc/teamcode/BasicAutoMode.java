@@ -7,8 +7,8 @@ import com.qualcomm.robotcore.hardware.DcMotorEx;
 import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.util.ElapsedTime;
 
-@Autonomous(name = "Far Auto Red Mode", group = "Competition")
-public class FarAutoRedMode extends LinearOpMode {
+@Autonomous(name = "Basic Auto Mode", group = "Competition")
+public class BasicAutoMode extends LinearOpMode {
 
     // Ticks per revolution for different goBILDA motors
     private static final double TICKS_PER_REV_6000_RPM = 28.0;
@@ -94,7 +94,7 @@ public class FarAutoRedMode extends LinearOpMode {
         leftBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
         rightBackDrive.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
 
-        telemetry.addData("Status", "Far Auto Red Ready");
+        telemetry.addData("Status", "Basic Auto Mode Ready");
         telemetry.update();
 
         waitForStart();
