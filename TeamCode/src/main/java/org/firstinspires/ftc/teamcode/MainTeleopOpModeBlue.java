@@ -57,8 +57,9 @@ public class MainTeleopOpModeBlue extends LinearOpMode {
         final double kickerIntakeTargetRPM = 200.0;
         final double kickerLaunchTargetRPM = 300.0;
         final double closeLauncherTargetRPM = 2350.0;
-        final double midLauncherTargetRPM = 2800.0;
+        final double midLauncherTargetRPM = 2600.0;
         final double farLauncherTargetRPM = 3350.0;
+        final double idleLauncherTargetRPM = 1000.0;
 
         final double intakeVelocity = (intakeTargetRPM / 60.0) * TICKS_PER_REV_312_RPM;
         final double kickerIntakeVelocity = (kickerIntakeTargetRPM / 60.0) * TICKS_PER_REV_312_RPM;
@@ -66,9 +67,10 @@ public class MainTeleopOpModeBlue extends LinearOpMode {
         final double closeLauncherVelocity = (closeLauncherTargetRPM / 60.0) * TICKS_PER_REV_6000_RPM;
         final double midLauncherVelocity = (midLauncherTargetRPM / 60.0) * TICKS_PER_REV_6000_RPM;
         final double farLauncherVelocity = (farLauncherTargetRPM / 60.0) * TICKS_PER_REV_6000_RPM;
+        final double idleLauncherVelocity = (idleLauncherTargetRPM / 60.0) * TICKS_PER_REV_6000_RPM;
 
-        final PIDFCoefficients pidf_6000_rpm = new PIDFCoefficients(0.6, 0.5, 0.0, 12.0);
-        final PIDFCoefficients pidf_312_rpm = new PIDFCoefficients(9.0, 3.0, 0.0, 0.0);
+        // final PIDFCoefficients pidf_6000_rpm = new PIDFCoefficients(0.6, 0.5, 0.0, 12.0);
+        // final PIDFCoefficients pidf_312_rpm = new PIDFCoefficients(9.0, 3.0, 0.0, 0.0);
 
         // ===================== STATE AND CONTROL VARIABLES =====================
         boolean lastRbPress = false;
@@ -94,7 +96,7 @@ public class MainTeleopOpModeBlue extends LinearOpMode {
             launcherMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             launcherMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             launcherMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            launcherMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidf_6000_rpm);
+            // launcherMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidf_6000_rpm);
             telemetry.addData("Launcher Motor (6000 RPM)", "✅ Connected");
         } catch (Exception e) {
             launcherMotor = null;
@@ -106,7 +108,7 @@ public class MainTeleopOpModeBlue extends LinearOpMode {
             intakeMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             intakeMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             intakeMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            intakeMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidf_312_rpm);
+            // intakeMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidf_312_rpm);
             telemetry.addData("Intake Motor (312 RPM)", "✅ Connected");
         } catch (Exception e) {
             intakeMotor = null;
@@ -118,7 +120,7 @@ public class MainTeleopOpModeBlue extends LinearOpMode {
             kickerMotor.setMode(DcMotor.RunMode.STOP_AND_RESET_ENCODER);
             kickerMotor.setMode(DcMotor.RunMode.RUN_USING_ENCODER);
             kickerMotor.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.FLOAT);
-            kickerMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidf_312_rpm);
+            // kickerMotor.setPIDFCoefficients(DcMotor.RunMode.RUN_USING_ENCODER, pidf_312_rpm);
             telemetry.addData("Kicker Motor (312 RPM)", "✅ Connected");
         } catch (Exception e) {
             kickerMotor = null;
@@ -184,7 +186,7 @@ public class MainTeleopOpModeBlue extends LinearOpMode {
             double distance = -1.0;
             if (colorSensor instanceof DistanceSensor) {
                 distance = ((DistanceSensor) colorSensor).getDistance(DistanceUnit.CM);
-                if (distance < 5) {
+                if (distance < 5.4) {
                     pixelDetected = true;
                 }
             }
@@ -262,15 +264,16 @@ public class MainTeleopOpModeBlue extends LinearOpMode {
                     if (res.getFiducialId() == TARGET_APRILTAG_ID) {
                         aprilTagFound = true;
                         double tx = res.getTargetXDegrees();
-                        final double AIM_TOLERANCE = 1.5; // Degrees
 
                         if (currentState == RobotState.TURNING_TO_SHOOT_FAR) {
-                            if (Math.abs(tx) > AIM_TOLERANCE) {
+                            double aimError = tx - 1.0; // Target the middle of the window
+                            // Fire when tx is between -3 and +5 degrees
+                            if (tx < -3.0 || tx > 5.0) {
                                 double turnKp = 0.05;
-                                double minTurnPower = 0.5;
-                                twist = (turnKp * tx) + Math.copySign(minTurnPower, tx);
+                                double minTurnPower = 0.45;
+                                twist = (turnKp * aimError) + Math.copySign(minTurnPower, aimError);
                                 // Clamp twist to a reasonable range
-                                twist = Math.max(-0.8, Math.min(0.8, twist));
+                                twist = Math.max(-0.75, Math.min(0.75, twist));
                             } else {
                                 twist = 0;
                                 currentState = RobotState.SHOOTING_FAR;
@@ -297,7 +300,7 @@ public class MainTeleopOpModeBlue extends LinearOpMode {
                         HoodServo.setPosition(0.30);
                     }
                     if (launcherMotor != null) {
-                        if (Math.abs(launcherMotor.getVelocity() - farLauncherVelocity) < (farLauncherVelocity * 0.10)) {
+                        if (Math.abs(launcherMotor.getVelocity() - farLauncherVelocity) < (farLauncherVelocity * 0.12)) {
                             intakeTargetVelocity = intakeVelocity;
                             kickerTargetVelocity = kickerLaunchVelocity;
                         }
@@ -310,7 +313,7 @@ public class MainTeleopOpModeBlue extends LinearOpMode {
                         HoodServo.setPosition(0.45);
                     }
                     if (launcherMotor != null) {
-                        if (Math.abs(launcherMotor.getVelocity() - midLauncherVelocity) < (midLauncherVelocity * 0.10)) {
+                        if (Math.abs(launcherMotor.getVelocity() - midLauncherVelocity) < (midLauncherVelocity * 0.12)) {
                             intakeTargetVelocity = intakeVelocity;
                             kickerTargetVelocity = kickerLaunchVelocity;
                         }
@@ -332,6 +335,7 @@ public class MainTeleopOpModeBlue extends LinearOpMode {
                     break;
 
                 case INTAKE:
+                    launcherTargetVelocity = idleLauncherVelocity;
                     intakeTargetVelocity = intakeVelocity;
                     if (!pixelDetected) {
                         kickerTargetVelocity = kickerIntakeVelocity;
@@ -339,8 +343,11 @@ public class MainTeleopOpModeBlue extends LinearOpMode {
                     break;
 
                 case IDLE:
+                    launcherTargetVelocity = idleLauncherVelocity;
                     if (xPressed) {
                         intakeTargetVelocity = -intakeVelocity;
+                        kickerTargetVelocity = -kickerLaunchVelocity;
+                        launcherTargetVelocity = -farLauncherVelocity;
                     }
                     break;
             }

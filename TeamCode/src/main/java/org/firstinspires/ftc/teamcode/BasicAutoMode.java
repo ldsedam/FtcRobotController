@@ -118,7 +118,7 @@ public class BasicAutoMode extends LinearOpMode {
                         intakeTargetVelocity = intakeVelocity;
                         kickerTargetVelocity = kickerLaunchVelocity;
                     }
-                    if (stateTimer.seconds() > 5.0) {
+                    if (stateTimer.seconds() > 10.0) {
                         currentState = AutoState.DRIVING_FORWARD;
                         stateTimer.reset();
                     }
