@@ -58,7 +58,7 @@ public class MainTeleopOpModeRed extends LinearOpMode {
         final double kickerLaunchTargetRPM = 300.0;
         final double closeLauncherTargetRPM = 2350.0;
         final double midLauncherTargetRPM = 2600.0;
-        final double farLauncherTargetRPM = 3350.0;
+        final double farLauncherTargetRPM = 3200.0;
         final double idleLauncherTargetRPM = 1000.0;
 
         final double intakeVelocity = (intakeTargetRPM / 60.0) * TICKS_PER_REV_312_RPM;
@@ -79,8 +79,6 @@ public class MainTeleopOpModeRed extends LinearOpMode {
         boolean lastBackPress = false;
         boolean lastYPress = false;
         final ElapsedTime closeLaunchTimer = new ElapsedTime();
-        final ElapsedTime farLaunchTimer = new ElapsedTime();
-
 
         // Drive control settings
         final double NORMAL_SPEED = 0.8;
@@ -223,7 +221,6 @@ public class MainTeleopOpModeRed extends LinearOpMode {
             if (currentState == RobotState.IDLE) {
                 if (aPressed) {
                     currentState = RobotState.TURNING_TO_SHOOT_FAR;
-                    farLaunchTimer.reset();
                 } else if (bPressed) {
                     currentState = RobotState.SHOOTING_MID;
                 } else if (yPressed) {
@@ -267,22 +264,19 @@ public class MainTeleopOpModeRed extends LinearOpMode {
                     if (res.getFiducialId() == TARGET_APRILTAG_ID) {
                         aprilTagFound = true;
                         double tx = res.getTargetXDegrees();
-                        final double AIM_TOLERANCE = 2.5; // Degrees
 
-                        if (currentState == RobotState.TURNING_TO_SHOOT_FAR || currentState == RobotState.SHOOTING_FAR) {
-                            double aimError = tx + 4.0; // Offset to aim 4 degrees to the right
-                            if (Math.abs(aimError) > AIM_TOLERANCE) {
+                        if (currentState == RobotState.TURNING_TO_SHOOT_FAR) {
+                            double aimError = tx + 0.0; // Target the middle of the window
+                            // Fire when tx is between -3 and +5 degrees
+                            if (tx < -1.0 || tx > 7.0) {
                                 double turnKp = 0.05;
-                                double minTurnPower = 0.6;
+                                double minTurnPower = 0.45;
                                 twist = (turnKp * aimError) + Math.copySign(minTurnPower, aimError);
                                 // Clamp twist to a reasonable range
-                                twist = Math.max(-0.9, Math.min(0.9, twist));
+                                twist = Math.max(-0.75, Math.min(0.75, twist));
                             } else {
                                 twist = 0;
-                                if (currentState == RobotState.TURNING_TO_SHOOT_FAR) {
-                                    currentState = RobotState.SHOOTING_FAR;
-                                    farLaunchTimer.reset();
-                                }
+                                currentState = RobotState.SHOOTING_FAR;
                             }
                         }
                         break; // Exit loop once target tag is found
@@ -296,9 +290,6 @@ public class MainTeleopOpModeRed extends LinearOpMode {
                     launcherTargetVelocity = farLauncherVelocity;
                     if (HoodServo != null) {
                         HoodServo.setPosition(0.30);
-                    }
-                    if(farLaunchTimer.seconds() > 0.75){
-                        currentState = RobotState.SHOOTING_FAR;
                     }
                     // Turning logic is handled above
                     break;

@@ -58,7 +58,7 @@ public class MainTeleopOpModeBlue extends LinearOpMode {
         final double kickerLaunchTargetRPM = 300.0;
         final double closeLauncherTargetRPM = 2350.0;
         final double midLauncherTargetRPM = 2600.0;
-        final double farLauncherTargetRPM = 3350.0;
+        final double farLauncherTargetRPM = 3200.0;
         final double idleLauncherTargetRPM = 1000.0;
 
         final double intakeVelocity = (intakeTargetRPM / 60.0) * TICKS_PER_REV_312_RPM;
@@ -266,7 +266,7 @@ public class MainTeleopOpModeBlue extends LinearOpMode {
                         double tx = res.getTargetXDegrees();
 
                         if (currentState == RobotState.TURNING_TO_SHOOT_FAR) {
-                            double aimError = tx - 1.0; // Target the middle of the window
+                            double aimError = tx - 0.0; // Target the middle of the window
                             // Fire when tx is between -3 and +5 degrees
                             if (tx < -3.0 || tx > 5.0) {
                                 double turnKp = 0.05;
